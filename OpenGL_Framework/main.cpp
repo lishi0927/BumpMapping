@@ -162,12 +162,17 @@ void NormalMapInit()
 	ModelMatrixID = glGetUniformLocation(programID, "M");
 //	ModelView3x3MatrixID = glGetUniformLocation(programID, "MV3x3");
 
-	// Load the texture
-	//DiffuseTexture = loadDDS("diffuse.DDS");
-	//NormalTexture = loadBMP_custom("normal.bmp");
-	DiffuseTexture = loadTexture("bricks2.jpg");
-	NormalTexture = loadTexture("bricks2_normal.jpg");
+// Load the texture
+    //DiffuseTexture = loadDDS("diffuse.DDS");
+    //NormalTexture = loadBMP_custom("normal.bmp");
+    //DiffuseTexture = loadTexture("bricks2.jpg");
+    //NormalTexture = loadTexture("bricks2_normal.jpg");
 	SpecularTexture = loadDDS("specular.DDS");
+	//HeightTexture = loadTexture("bricks2_disp.jpg");
+
+	DiffuseTexture = loadTexture("wood.png");
+	NormalTexture = loadTexture("toy_box_normal.png");
+	HeightTexture = loadTexture("toy_box_disp.png");
 
 	// Get a handle for our "myTextureSampler" uniform
 	DiffuseTextureID = glGetUniformLocation(programID, "DiffuseTextureSampler");
@@ -198,7 +203,7 @@ void ParallaxMapInit()
 	glBindVertexArray(VertexArrayID);
 
 	// Create and compile our GLSL program from the shaders
-	programID = LoadShaders("SteepParallaxMapping.vert", "SteepParallaxMapping.frag");
+	programID = LoadShaders("ReliefMapping.vert", "ReliefMapping.frag");
 
 	// Get a handle for our "MVP" uniform
 	MatrixID = glGetUniformLocation(programID, "MVP");
@@ -209,10 +214,14 @@ void ParallaxMapInit()
 	// Load the texture
 	//DiffuseTexture = loadDDS("diffuse.DDS");
 	//NormalTexture = loadBMP_custom("normal.bmp");
-	DiffuseTexture = loadTexture("bricks2.jpg");
-	NormalTexture = loadTexture("bricks2_normal.jpg");
+	//DiffuseTexture = loadTexture("bricks2.jpg");
+	//NormalTexture = loadTexture("bricks2_normal.jpg");
 	SpecularTexture = loadDDS("specular.DDS");
-	HeightTexture = loadTexture("bricks2_disp.jpg");
+	//HeightTexture = loadTexture("bricks2_disp.jpg");
+
+	 DiffuseTexture = loadTexture("wood.png");
+	 NormalTexture = loadTexture("toy_box_normal.png");
+	 HeightTexture = loadTexture("toy_box_disp.png");
 
 	// Get a handle for our "myTextureSampler" uniform
 	DiffuseTextureID = glGetUniformLocation(programID, "DiffuseTextureSampler");
@@ -337,8 +346,6 @@ void ParallaxMapRender()
 
 	renderQuad();
 }
-
-
 
 int main(void)
 {

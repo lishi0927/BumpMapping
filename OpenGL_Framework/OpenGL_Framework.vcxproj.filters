@@ -85,5 +85,17 @@
     <None Include="SteepParallaxMapping.frag">
       <Filter>Shader</Filter>
     </None>
+    <None Include="ParallaxOcclusionMapping.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="ParallaxOcclusionMapping.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="ReliefMapping.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="ReliefMapping.frag">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

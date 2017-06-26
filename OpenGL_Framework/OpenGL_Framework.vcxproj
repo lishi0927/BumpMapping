@@ -87,6 +87,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -139,6 +140,10 @@
     <None Include="NormalMapping.vert" />
     <None Include="ParallaxMapping.frag" />
     <None Include="ParallaxMapping.vert" />
+    <None Include="ParallaxOcclusionMapping.frag" />
+    <None Include="ParallaxOcclusionMapping.vert" />
+    <None Include="ReliefMapping.frag" />
+    <None Include="ReliefMapping.vert" />
     <None Include="SteepParallaxMapping.frag" />
     <None Include="SteepParallaxMapping.vert" />
   </ItemGroup>
