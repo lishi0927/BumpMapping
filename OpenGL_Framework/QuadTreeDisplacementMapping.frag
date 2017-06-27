@@ -18,42 +18,43 @@ uniform sampler2D HeightTextureSampler;
 uniform vec3 LightPosition_worldspace;
 
 const float height_scale = 0.1;
+const int MaxMipLvl = 7;
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 { 
-    const float minLayers = 5;
-    const float maxLayers = 15;
-    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0, 0, 1), viewDir)));
-	float layerDepth = 1.0 / numLayers;
-	float currentLayerDepth = 0.0;
-	vec2 p = viewDir.xy / viewDir.z * height_scale;
-	vec2 deltaTexCoords = p / numLayers;
+    const int MaxLevel = MaxMipLvl;
+	int NodeCount = int(pow(2, MaxLevel));
+	float d = 0.0;
+	vec3 p2 = vec3(texCoords,0.0);
+	int Level = 7;
+
+	ivec2 DirSign = ivec2(sign(viewDir.xy));
 	
-	vec2 currentTexCoords = texCoords;
-	float currentDepthMapValue = texture(HeightTextureSampler, currentTexCoords).r;
-	
-	while(currentLayerDepth < currentDepthMapValue)
+
+	while(Level >= 0)
 	{
-	  // shift texture coordinates along direction of P
-	  currentTexCoords -= deltaTexCoords;
-	  // get depthmap value at current texture coordinates
-	  currentDepthMapValue = texture(HeightTextureSampler, currentTexCoords).r;
-	  // get depth of next layer
-      currentLayerDepth += layerDepth; 
-	}   
+	   d = textureLod(HeightTextureSampler,p2.xy, Level).r;
 
-	// get texture coordinates before collision (reverse operations)
-    vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
-
-	// get depth after and before collision for linear interpolation
-	float afterDepth  = currentDepthMapValue - currentLayerDepth;
-	float beforeDepth = texture(HeightTextureSampler, prevTexCoords).r - currentLayerDepth + layerDepth;
-
-	// interpolation of texture coordinates
-	float weight = afterDepth / (afterDepth - beforeDepth);
-	vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
-
-	return finalTexCoords;  
+	   if(d > p2.z)
+	   {
+	      vec3 tmpp2 = vec3(texCoords,0.0) + vec3(-height_scale * viewDir.xy / viewDir.z,1.0) * d;
+		  NodeCount = int(pow(2, MaxLevel - Level));
+		  ivec4 NodeID = ivec4(int(p2.x * NodeCount), int(p2.y * NodeCount),int(tmpp2.x * NodeCount), int(tmpp2.y * NodeCount));
+		  if(NodeID.x != NodeID.z || NodeID.y != NodeID.w)
+		  {
+		    vec2 a = p2.xy - texCoords;
+			vec2 p3 = (NodeID.xy + DirSign) / NodeCount;
+			vec2 b = (p3.xy - texCoords);
+			vec2 dNC = abs(p2.z * b / a);
+			d = min(d, min(dNC.x, dNC.y));
+			Level = Level + 2;
+			tmpp2 = vec3(texCoords,0.0) + vec3(-height_scale * viewDir.xy / viewDir.z, 1.0) * d;
+		  }
+		  p2 = tmpp2;
+	   }
+	   Level = Level - 1;
+	}
+	return p2.xy;
 } 
 
 void main(){

@@ -21,10 +21,13 @@ const float height_scale = 0.1;
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 { 
-    const float numLayers = 10;
+   const float minLayers = 5;
+   const float maxLayers = 15;
+   float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0, 0, 1), viewDir)));
+
 	float layerDepth = 1.0 / numLayers;
 	float currentLayerDepth = 0.0;
-	vec2 p = viewDir.xy * height_scale;
+	vec2 p = viewDir.xy / viewDir.z * height_scale;
 	vec2 deltaTexCoords = p / numLayers;
 	
 	vec2 currentTexCoords = texCoords;

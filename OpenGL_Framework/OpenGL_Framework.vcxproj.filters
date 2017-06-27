@@ -97,5 +97,17 @@
     <None Include="ReliefMapping.frag">
       <Filter>Shader</Filter>
     </None>
+    <None Include="QuadTreeDisplacementMapping.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="QuadTreeDisplacementMapping.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="ConeStepMapping.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="ConeStepMapping.frag">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

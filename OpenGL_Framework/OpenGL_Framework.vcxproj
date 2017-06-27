@@ -134,6 +134,8 @@
     <ClInclude Include="vboindexer.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ConeStepMapping.frag" />
+    <None Include="ConeStepMapping.vert" />
     <None Include="NewNormalMapping.frag" />
     <None Include="NewNormalMapping.vert" />
     <None Include="NormalMapping.frag" />
@@ -142,6 +144,8 @@
     <None Include="ParallaxMapping.vert" />
     <None Include="ParallaxOcclusionMapping.frag" />
     <None Include="ParallaxOcclusionMapping.vert" />
+    <None Include="QuadTreeDisplacementMapping.frag" />
+    <None Include="QuadTreeDisplacementMapping.vert" />
     <None Include="ReliefMapping.frag" />
     <None Include="ReliefMapping.vert" />
     <None Include="SteepParallaxMapping.frag" />

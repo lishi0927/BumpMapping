@@ -203,7 +203,7 @@ void ParallaxMapInit()
 	glBindVertexArray(VertexArrayID);
 
 	// Create and compile our GLSL program from the shaders
-	programID = LoadShaders("ReliefMapping.vert", "ReliefMapping.frag");
+	programID = LoadShaders("QuadTreeDisplacementMapping.vert", "QuadTreeDisplacementMapping.frag");
 
 	// Get a handle for our "MVP" uniform
 	MatrixID = glGetUniformLocation(programID, "MVP");
