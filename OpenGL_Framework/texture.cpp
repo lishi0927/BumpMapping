@@ -251,3 +251,199 @@ GLuint loadTexture(char const * path)
 
 	return textureID;
 }
+
+GLuint loadDisplacementTexture(char const * path)
+{
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrComponents;
+	unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
+	if (data)
+	{
+		GLenum format;
+		if (nrComponents == 1)
+			format = GL_RED;
+		else if (nrComponents == 3)
+			format = GL_RGB;
+		else if (nrComponents == 4)
+			format = GL_RGBA;
+
+		int chans = 4;
+		int ScanWidth = chans * width;
+		int TheSize = ScanWidth * height;
+
+
+		float iwidth = 1.0 / width;
+		float iheight = 1.0 / height;
+
+		const float max_ratio = 1.0;
+		const float cone_tol2 = 4.0 / (255.0 * 255.0);
+
+		for(int y = 0; y < height; y++)
+			for (int x = 0; x < width; x++)
+			{
+				int der;
+				if (x == 0)
+					der = (data[y*ScanWidth + chans * (x + 1)] - data[y*ScanWidth + chans * x]) / 2;
+				else if(x == width -1)
+					der = (data[y*ScanWidth + chans * (x)] - data[y*ScanWidth + chans * (x-1)]) / 2;
+				else
+					der = data[y*ScanWidth + chans * (x + 1)] - data[y*ScanWidth + chans * (x - 1)];
+				data[y * ScanWidth + chans * x + 2] = 127 + der / 2;
+
+				if(y == 0)
+					der = (data[(y + 1) * ScanWidth + chans * x] - data[y * ScanWidth + chans * x]) / 2;
+				else if(y == height - 1)
+					der = (data[y * ScanWidth + chans * x] - data[(y - 1) * ScanWidth + chans * x]) / 2;
+				else
+					der = data[(y + 1) * ScanWidth + chans * x] - data[(y - 1) * ScanWidth + chans * x];
+				data[y * ScanWidth + chans * x + 3] = 127 + der / 2;
+			}
+
+		for (int y = 0; y < height; y++)
+			for (int x = 0; x < width; x++)
+			{
+				float min_ratio2, actual_ratio;
+				int x1, x2, y1, y2;
+				float ht, dhdx, dhdy, r2, h2;
+
+				min_ratio2 = max_ratio * max_ratio;
+
+				ht = data[y * ScanWidth + chans * x] / 255.0;
+				dhdx = (data[y * ScanWidth + chans * x + 2] / 255.0 - 0.5) * width;
+				dhdy = -(data[y * ScanWidth + chans * x + 3] / 255.0 - 0.5) * height;
+
+				for (int rad = 1; (rad*rad <= 1.1 * 1.1 * (1.0 - ht)*(1.0 - ht) * min_ratio2 * width * height)
+					&& (rad <= 1.1 * (1.0 - ht) * width) && (rad <= 1.1 * (1.0 - ht) * height); ++rad)
+				{
+					//west
+					x1 = x - rad;
+					while (x1 < 0)
+						x1 += width;
+					if (x1 >= 0)
+					{
+						float delx = -rad * iwidth;
+						y1 = y - rad + 1;
+						if (y1 < 0) y1 = 0;
+						y2 = y + rad - 1;
+						if (y2 >= height)
+							y2 = height - 1;
+
+						for (int dy = y1; dy <= y2; ++dy)
+						{
+							float dely = (dy - y)*iheight;
+							r2 = delx * delx + dely *dely;
+							h2 = data[dy * ScanWidth + chans * x1] / 255.0 - ht;
+							if ((h2 > 0.0) && (h2 * h2 * min_ratio2 > r2))
+							{
+								min_ratio2 = r2 / (h2 * h2);
+							}
+						}
+					}
+
+					x2 = x + rad;
+					while (x2 >= width)
+						x2 -= width;
+					if (x2 < width)
+					{
+						float delx = rad * iwidth;
+						y1 = y - rad + 1;
+						if (y1 < 0)
+							y1 = 0;
+						y2 = y + rad - 1;
+						if (y2 >= height)
+							y2 = height - 1;
+						for (int dy = y1; dy <= y2; ++dy)
+						{
+							float dely = (dy - y) * iheight;
+							r2 = delx * delx + dely * dely;
+							h2 = data[dy * ScanWidth + chans * x2] / 255.0 - ht;
+							if ((h2 > 0.0) && (h2 * h2 * min_ratio2 > r2))
+							{
+								min_ratio2 = r2 / (h2 * h2);
+							}
+						}
+					}
+
+					//North
+					y1 = y - rad;
+					while (y1 < 0)
+						y1 += height;
+					if (y1 >= 0)
+					{
+						float dely = -rad * iheight;
+						x1 = x - rad;
+						if (x1 < 0)
+							x1 = 0;
+						x2 = x + rad;
+						if (x2 >= width)
+							x2 = width - 1;
+						for (int dx = x1; dx <= x2; ++dx)
+						{
+							float delx = (dx - x)* iwidth;
+							r2 = delx *delx + dely *dely;
+							h2 = data[y1 * ScanWidth + chans * dx] / 255.0 - ht;
+							if ((h2 > 0.0) && (h2 * h2 * min_ratio2 > r2))
+							{
+								min_ratio2 = r2 / (h2 * h2);
+							}
+						}
+					}
+
+					//South
+					y2 = y + rad;
+					while (y2 >= height)
+						y2 -= height;
+					if (y2 < height)
+					{
+						float dely = rad * iheight;
+						x1 = x - rad;
+						if (x1 < 0)x1 = 0;
+						x2 = x + rad;
+						if (x2 >= width)
+							x2 = width - 1;
+						for (int dx = x1; dx < x2; ++dx)
+						{
+							float delx = (dx - x)*iwidth;
+							r2 = delx * delx + dely *dely;
+							h2 = data[y2 * ScanWidth + chans * dx] / 255.0 - ht;
+							if ((h2 > 0.0) && (h2 * h2 * min_ratio2 > r2))
+							{
+								min_ratio2 = r2 / (h2*h2);
+							}
+						}
+					}
+				}
+					actual_ratio = sqrt(min_ratio2);
+					actual_ratio /= max_ratio;
+
+					actual_ratio = sqrt(actual_ratio);
+
+					data[y * ScanWidth + chans * x + 1] = static_cast<unsigned char>(255.0 * actual_ratio + 0.5);
+					if (data[y * ScanWidth + chans * x + 1] < 1)
+						data[y * ScanWidth + chans * x + 1] = 1;
+			}
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+
+
+		glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 7);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		stbi_image_free(data);
+	}
+	else
+	{
+		stbi_image_free(data);
+	}
+
+	return textureID;
+}

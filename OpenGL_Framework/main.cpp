@@ -203,7 +203,7 @@ void ParallaxMapInit()
 	glBindVertexArray(VertexArrayID);
 
 	// Create and compile our GLSL program from the shaders
-	programID = LoadShaders("QuadTreeDisplacementMapping.vert", "QuadTreeDisplacementMapping.frag");
+	programID = LoadShaders("ConeStepMapping.vert", "ConeStepMapping.frag");
 
 	// Get a handle for our "MVP" uniform
 	MatrixID = glGetUniformLocation(programID, "MVP");
@@ -222,6 +222,56 @@ void ParallaxMapInit()
 	 DiffuseTexture = loadTexture("wood.png");
 	 NormalTexture = loadTexture("toy_box_normal.png");
 	 HeightTexture = loadTexture("toy_box_disp.png");
+
+	// Get a handle for our "myTextureSampler" uniform
+	DiffuseTextureID = glGetUniformLocation(programID, "DiffuseTextureSampler");
+	NormalTextureID = glGetUniformLocation(programID, "NormalTextureSampler");
+	SpecularTextureID = glGetUniformLocation(programID, "SpecularTextureSampler");
+	HeightTextureID = glGetUniformLocation(programID, "HeightTextureSampler");
+
+	// Get a handle for our "LightPosition" uniform
+	glUseProgram(programID);
+	LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
+	CameraID = glGetUniformLocation(programID, "CameraPosition_worldspace");
+}
+
+void ConeStepMapInit()
+{
+	// Dark blue background
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+
+	// Enable depth test
+	glEnable(GL_DEPTH_TEST);
+	// Accept fragment if it closer to the camera than the former one
+	glDepthFunc(GL_LESS);
+
+	// Cull triangles which normal is not towards the camera
+	glEnable(GL_CULL_FACE);
+
+
+	glGenVertexArrays(1, &VertexArrayID);
+	glBindVertexArray(VertexArrayID);
+
+	// Create and compile our GLSL program from the shaders
+	programID = LoadShaders("ConeStepMapping.vert", "ConeStepMapping.frag");
+
+	// Get a handle for our "MVP" uniform
+	MatrixID = glGetUniformLocation(programID, "MVP");
+	//	ViewMatrixID = glGetUniformLocation(programID, "V");
+	ModelMatrixID = glGetUniformLocation(programID, "M");
+	//	ModelView3x3MatrixID = glGetUniformLocation(programID, "MV3x3");
+
+	// Load the texture
+	//DiffuseTexture = loadDDS("diffuse.DDS");
+	//NormalTexture = loadBMP_custom("normal.bmp");
+	//DiffuseTexture = loadTexture("bricks2.jpg");
+	//NormalTexture = loadTexture("bricks2_normal.jpg");
+	SpecularTexture = loadDDS("specular.DDS");
+	//HeightTexture = loadTexture("bricks2_disp.jpg");
+
+	DiffuseTexture = loadTexture("wood.png");
+	NormalTexture = loadTexture("toy_box_normal.png");
+	HeightTexture = loadDisplacementTexture("toy_box_disp.png");
 
 	// Get a handle for our "myTextureSampler" uniform
 	DiffuseTextureID = glGetUniformLocation(programID, "DiffuseTextureSampler");
@@ -393,7 +443,8 @@ int main(void)
 	glfwSetCursorPos(window, 1024 / 2, 768 / 2);
 
 //	NormalMapInit();
-	ParallaxMapInit();
+//	ParallaxMapInit();
+	ConeStepMapInit();
 
 	// For speed computation
 	double lastTime = glfwGetTime();
